@@ -83,19 +83,37 @@ exports.getPhoto = catchAsync(async (req, res, next) => {
 
 exports.getAllReviews = factory.getAll(Review);
 
+// exports.createReview = catchAsync(async (req, res, next) => {
+//   const data = req.body;
+
+//   data.user = req.user._id;
+
+//   const doc = await Review.create(data);
+
+//   res.status(201).json({
+//     status: "success",
+//     data: {
+//       data: doc
+//     }
+//   });
+// });
+
 exports.createReview = catchAsync(async (req, res, next) => {
   const data = req.body;
 
   data.user = req.user._id;
 
-  const doc = await Review.create(data);
-
-  res.status(201).json({
-    status: "success",
-    data: {
-      data: doc
-    }
+  const doc = await Review.create({
+    price: "0",
+    name: "new temp name",
+    groupName: "unknown",
+    orderNumber: "0",
+    orderDate: Date.now(),
+    user: req.user._id
   });
+
+  req.params.id = doc._id;
+  next();
 });
 
 // exports.getReview = factory.getOne(Review, "user");
@@ -291,6 +309,8 @@ exports.getStatistic = catchAsync(async (req, res, next) => {
   let fee = [];
   let result = [];
   let reviews = [];
+  let sellersStatistic = {};
+  let groupsStatistic = {};
 
   for (let i = 1; i <= 12; i++) {
     const date = new Date(`${currentYear}-${i}-1`);
@@ -310,18 +330,47 @@ exports.getStatistic = catchAsync(async (req, res, next) => {
     let sum = 0;
     let fees = 0;
     let results = 0;
+    let sellers = {};
+    let groups = {};
 
     if (doc.length > 0) {
       for (let j = 0; j < doc.length; j++) {
         sum += doc[j].price;
         fees += doc[j].fee;
         results += doc[j].result;
+
+        if (sellers[doc[j].contactPerson]) {
+          sellers[doc[j].contactPerson] = sellers[doc[j].contactPerson] + 1;
+        } else {
+          sellers[doc[j].contactPerson] = 1;
+        }
+
+        if (groups[doc[j].groupName]) {
+          groups[doc[j].groupName] = groups[doc[j].groupName] + doc[j].price;
+        } else {
+          groups[doc[j].groupName] = doc[j].price;
+        }
       }
     }
+
     moneySpent.push(sum.toFixed(2));
     fee.push(fees.toFixed(2));
     result.push(results.toFixed(2));
     reviews.push(doc.length.toFixed(2));
+    for (x in sellers) {
+      if (sellersStatistic[x]) {
+        sellersStatistic[x] = sellersStatistic[x] + sellers[x];
+      } else {
+        sellersStatistic[x] = sellers[x];
+      }
+    }
+    for (j in groups) {
+      if (groupsStatistic[j]) {
+        groupsStatistic[j] = groupsStatistic[j] + groups[j];
+      } else {
+        groupsStatistic[j] = groups[j];
+      }
+    }
   }
 
   res.status(200).json({
@@ -330,7 +379,9 @@ exports.getStatistic = catchAsync(async (req, res, next) => {
       moneySpent: moneySpent,
       fee: fee,
       result: result,
-      reviews: reviews
+      reviews: reviews,
+      sellersStatistic: sellersStatistic,
+      groupsStatistic: groupsStatistic
     }
   });
 });

@@ -15,22 +15,13 @@ router.use(authController.protect);
 
 router
   .route("/status/:status/page/:statusPage")
-  .get(authController.protect, reviewController.getStatus);
+  .get(reviewController.getStatus);
 
-router
-  .route("/status/:status")
-  .get(authController.protect, reviewController.getStatus);
+router.route("/status/:status").get(reviewController.getStatus);
 
-router
-  .route("/find/:name")
-  .get(authController.protect, reviewController.getByName);
+router.route("/find/:name").get(reviewController.getByName);
 
-router
-  .route("/statistic/")
-  .get(authController.protect, reviewController.getStatistic);
-
-// //*** Users routes ************************************//
-// router.use(authController.protect);
+router.route("/statistic/").get(reviewController.getStatistic);
 
 router
   .route("/my/reviews/:page")
@@ -40,9 +31,12 @@ router
   .route("/my/reviews/")
   .get(userController.getMe, reviewController.getAllUserReviews)
   .post(
+    // reviewController.upLoadReviewImage,
+    // reviewController.resizeReviewImage,
+    reviewController.createReview,
     reviewController.upLoadReviewImage,
     reviewController.resizeReviewImage,
-    reviewController.createReview
+    reviewController.updateUserReview
   );
 
 router

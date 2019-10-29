@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const validator = require("validator");
 
 const reviewSchema = new mongoose.Schema(
   {
@@ -51,6 +52,16 @@ const reviewSchema = new mongoose.Schema(
       trim: true,
       required: [true, "A review must have a group"]
     },
+    contactPerson: {
+      type: String,
+      trim: true,
+      default: "Unknown"
+    },
+    email: {
+      type: String,
+      lowercase: true,
+      // validate: [validator.isEmail, "Please provide a valid email"]
+    },
     orderDate: {
       type: Date,
       default: Date.now()
@@ -67,10 +78,6 @@ const reviewSchema = new mongoose.Schema(
     gotMoney: {
       type: Number,
       default: 0
-    },
-    reviewLink: {
-      type: String,
-      trim: true
     },
     sold: {
       type: Number,
